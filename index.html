@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oxen Studios - Premium Oversized Tees</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
 </head>
 <body>
     <!-- Splash Screen -->
     <div id="splash-screen" class="splash-screen">
         <div class="splash-content">
+            <img src="images/logo.png?nf_resize=fit&w=120" alt="Oxen Studios" class="logo-mark" loading="eager" decoding="async" width="120" height="120">
             <h1 class="brand-name">OXEN STUDIOS</h1>
             <p class="tagline">Premium Oversized Tees – Pakistan Only</p>
             <div class="loading-dots">
@@ -28,6 +32,7 @@
         <header class="header">
             <div class="container">
                 <div class="nav-brand">
+                    <img src="images/logo.png?nf_resize=fit&w=28" alt="Oxen Logo" class="brand-logo" loading="eager" decoding="async" width="28" height="28">
                     <h2>OXEN STUDIOS</h2>
                 </div>
                 <nav class="nav">
@@ -35,6 +40,9 @@
                     <a href="#about" class="nav-link">About</a>
                     <a href="#contact" class="nav-link">Contact</a>
                 </nav>
+                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <div class="cart-icon" onclick="toggleCart()">
                     <i class="fas fa-shopping-bag"></i>
                     <span class="cart-count" id="cart-count">0</span>
@@ -44,6 +52,7 @@
 
         <!-- Hero Section -->
         <section class="hero">
+            <div class="hero-logo-bg" aria-hidden="true"></div>
             <div class="container">
                 <div class="hero-content">
                     <h1 class="hero-title">Premium Oversized Tees</h1>
@@ -135,7 +144,7 @@
             </div>
             <div class="modal-body">
                 <div class="product-image-container">
-                    <img id="modal-product-image" src="" alt="Product Image">
+                    <img id="modal-product-image" src="" alt="Product Image" loading="lazy" decoding="async" width="1200" height="1200">
                 </div>
                 <div class="product-details">
                     <p id="modal-product-description" class="product-description"></p>

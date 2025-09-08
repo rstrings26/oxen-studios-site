@@ -71,10 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Show splash screen for 3 seconds
+    // Show splash screen briefly (reduced to 800ms)
     setTimeout(() => {
         hideSplashScreen();
-    }, 3000);
+    }, 800);
     
     // Load products
     loadProducts();
@@ -84,6 +84,12 @@ function initializeApp() {
     
     // Update cart count
     updateCartCount();
+
+    // Initialize scroll reveal once content exists
+    initializeScrollReveal();
+
+    // Initialize theme
+    initializeTheme();
 }
 
 function hideSplashScreen() {
@@ -105,6 +111,42 @@ function loadProducts() {
         const productCard = createProductCard(product);
         productsGrid.appendChild(productCard);
     });
+
+    // Tag product cards for reveal with small stagger
+    const cards = productsGrid.querySelectorAll('.product-card');
+    cards.forEach((card, index) => {
+        card.classList.add('reveal');
+        if (index % 3 === 1) card.classList.add('delay-1');
+        if (index % 3 === 2) card.classList.add('delay-2');
+    });
+}
+
+function initializeScrollReveal() {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
+
+    // Mark hero and sections
+    const hero = document.querySelector('.hero .hero-content');
+    if (hero) hero.classList.add('reveal', 'delay-1');
+    const sections = document.querySelectorAll('.section-title, .about-content, .contact-info');
+    sections.forEach((el, i) => {
+        el.classList.add('reveal');
+        if (i % 2 === 0) el.classList.add('delay-1');
+        if (i % 3 === 0) el.classList.add('delay-2');
+    });
+
+    if (!prefersReduced) {
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    } else {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+    }
 }
 
 function createProductCard(product) {
@@ -113,7 +155,20 @@ function createProductCard(product) {
     card.onclick = () => openProductModal(product);
     
     card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" class="product-image">
+        <img
+            src="${product.image}?nf_resize=fit&w=800"
+            srcset="
+                ${product.image}?nf_resize=fit&w=400 400w,
+                ${product.image}?nf_resize=fit&w=800 800w,
+                ${product.image}?nf_resize=fit&w=1200 1200w"
+            sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            alt="${product.name}"
+            class="product-image"
+            loading="lazy"
+            decoding="async"
+            width="800"
+            height="800"
+        >
         <div class="product-info">
             <h3 class="product-name">${product.name}</h3>
             <p class="product-description">${product.description}</p>
@@ -134,7 +189,12 @@ function openProductModal(product) {
     const modalPrice = document.getElementById('modal-product-price');
     
     modalName.textContent = product.name;
-    modalImage.src = product.image;
+    modalImage.src = product.image + '?nf_resize=fit&w=1200';
+    modalImage.srcset = `
+        ${product.image}?nf_resize=fit&w=600 600w,
+        ${product.image}?nf_resize=fit&w=900 900w,
+        ${product.image}?nf_resize=fit&w=1200 1200w`;
+    modalImage.sizes = '(max-width: 900px) 90vw, 1200px';
     modalImage.alt = product.name;
     modalDescription.textContent = product.description;
     modalPrice.textContent = `Rs. ${product.price.toLocaleString()}`;
@@ -219,7 +279,7 @@ function updateCartDisplay() {
     
     cartItems.innerHTML = cart.map(item => `
         <div class="cart-item">
-            <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+            <img src="${item.image}?nf_resize=fit&w=200" alt="${item.name}" class="cart-item-image" loading="lazy" decoding="async" width="200" height="200">
             <div class="cart-item-details">
                 <div class="cart-item-name">${item.name}</div>
                 <div class="cart-item-size">Size: ${item.size}</div>
@@ -317,6 +377,38 @@ function initializeEventListeners() {
             }
         });
     });
+
+    // Theme toggle
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleTheme);
+    }
+}
+
+function initializeTheme() {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored || (prefersDark ? 'dark' : 'light');
+    setTheme(theme);
+}
+
+function setTheme(theme) {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    updateThemeIcon(theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    btn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 
 async function handleCheckout(event) {

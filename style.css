@@ -5,11 +5,40 @@
     box-sizing: border-box;
 }
 
+:root {
+    --bg: #fff;
+    --surface: #ffffff;
+    --text: #333333;
+    --text-strong: #000000;
+    --muted: #666666;
+    --border: rgba(0,0,0,0.1);
+    --accent: #000000;
+    --accent-contrast: #ffffff;
+    --hero-grad-start: #f8f9fa;
+    --hero-grad-end: #e9ecef;
+}
+
+[data-theme="dark"] {
+    --bg: #0f1115;
+    --surface: #111318;
+    --text: #d8dbe2;
+    --text-strong: #ffffff;
+    --muted: #9aa0a6;
+    --border: rgba(255,255,255,0.12);
+    --accent: #e6e8eb;
+    --accent-contrast: #0f1115;
+    --hero-grad-start: #12141a;
+    --hero-grad-end: #0f1115;
+}
+
+/* Hide hero watermark logo in dark mode for cleaner contrast */
+[data-theme="dark"] .hero-logo-bg { display: none; }
+
 body {
     font-family: 'Inter', sans-serif;
     line-height: 1.6;
-    color: #333;
-    background-color: #fff;
+    color: var(--text);
+    background-color: var(--bg);
     overflow-x: hidden;
 }
 
@@ -42,6 +71,13 @@ body {
 .splash-content {
     text-align: center;
     color: white;
+}
+
+.logo-mark {
+    display: inline-block;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
+    animation: fadeInUp 0.9s ease-out;
 }
 
 .brand-name {
@@ -108,16 +144,48 @@ body {
     opacity: 0;
 }
 
+/* Scroll Reveal Base */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    will-change: opacity, transform;
+    transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Slight stagger utility */
+.delay-1 { transition-delay: 80ms; }
+.delay-2 { transition-delay: 160ms; }
+.delay-3 { transition-delay: 240ms; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal.is-visible,
+    .product-card,
+    .cta-button,
+    .add-to-cart-btn,
+    .confirmation-btn {
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
 /* Header */
 .header {
-    background: rgba(255, 255, 255, 0.95);
+    background: color-mix(in oklab, var(--surface) 95%, transparent);
     backdrop-filter: blur(10px);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border);
 }
 
 .header .container {
@@ -131,7 +199,19 @@ body {
     font-size: 1.5rem;
     font-weight: 800;
     letter-spacing: 0.1em;
-    color: #000;
+    color: var(--text-strong);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.brand-logo {
+    width: 28px;
+    height: 28px;
+    display: inline-block;
 }
 
 .nav {
@@ -141,33 +221,33 @@ body {
 
 .nav-link {
     text-decoration: none;
-    color: #333;
+    color: var(--text);
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
 .nav-link:hover {
-    color: #000;
+    color: var(--text-strong);
 }
 
 .cart-icon {
     position: relative;
     cursor: pointer;
     font-size: 1.5rem;
-    color: #333;
+    color: var(--text);
     transition: color 0.3s ease;
 }
 
 .cart-icon:hover {
-    color: #000;
+    color: var(--text-strong);
 }
 
 .cart-count {
     position: absolute;
     top: -8px;
     right: -8px;
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     border-radius: 50%;
     width: 20px;
     height: 20px;
@@ -178,11 +258,51 @@ body {
     font-weight: 600;
 }
 
+/* Theme Toggle */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    height: 36px;
+    width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.theme-toggle:hover { background: color-mix(in oklab, var(--surface) 80%, transparent); }
+.theme-toggle:focus { outline: 3px solid var(--border); outline-offset: 2px; }
+
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: linear-gradient(135deg, var(--hero-grad-start) 0%, var(--hero-grad-end) 100%);
     padding: 120px 0 80px;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-logo-bg {
+    position: absolute;
+    inset: 0;
+    background: url('images/logo.png') center / 260px 260px no-repeat;
+    opacity: 0.05;
+    transform: translateY(20px) scale(1);
+    animation: heroFloat 10s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes heroFloat {
+    0% { transform: translateY(20px) scale(1); }
+    50% { transform: translateY(-10px) scale(1.03); }
+    100% { transform: translateY(20px) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-logo-bg { animation: none; transform: none; }
 }
 
 .hero-content {
@@ -194,21 +314,21 @@ body {
     font-size: 3.5rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
-    color: #000;
+    color: var(--text-strong);
     line-height: 1.1;
 }
 
 .hero-subtitle {
     font-size: 1.3rem;
-    color: #666;
+    color: var(--muted);
     margin-bottom: 2.5rem;
     font-weight: 400;
 }
 
 .cta-button {
     display: inline-block;
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     padding: 1rem 2.5rem;
     text-decoration: none;
     border-radius: 50px;
@@ -220,7 +340,7 @@ body {
 }
 
 .cta-button:hover {
-    background: #333;
+    background: color-mix(in oklab, var(--accent) 85%, transparent);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
@@ -231,13 +351,13 @@ body {
     font-weight: 700;
     text-align: center;
     margin-bottom: 3rem;
-    color: #000;
+    color: var(--text-strong);
 }
 
 /* Products Section */
 .products-section {
     padding: 80px 0;
-    background: white;
+    background: var(--surface);
 }
 
 .products-grid {
@@ -249,6 +369,7 @@ body {
 
 .product-card {
     background: white;
+    background: var(--surface);
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
@@ -277,15 +398,33 @@ body {
     padding: 1.5rem;
 }
 
+/* Micro-interactions */
+.product-card:focus-within,
+.product-card:focus {
+    outline: 2px solid var(--border);
+    outline-offset: 2px;
+}
+
+.product-name { transition: color 200ms ease; }
+.product-card:hover .product-name { color: var(--text-strong); }
+
+.cta-button:focus,
+.add-to-cart-btn:focus,
+.confirmation-btn:focus,
+.checkout-btn:focus {
+    outline: 3px solid rgba(0,0,0,0.3);
+    outline-offset: 2px;
+}
+
 .product-name {
     font-size: 1.3rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    color: #000;
+    color: var(--text-strong);
 }
 
 .product-description {
-    color: #666;
+    color: var(--muted);
     margin-bottom: 1rem;
     font-size: 0.95rem;
     line-height: 1.5;
@@ -294,7 +433,7 @@ body {
 .product-price {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #000;
+    color: var(--text-strong);
 }
 
 .product-stock {
@@ -309,7 +448,7 @@ body {
 /* About Section */
 .about-section {
     padding: 80px 0;
-    background: #f8f9fa;
+    background: color-mix(in oklab, var(--surface) 96%, var(--bg));
 }
 
 .about-content {
@@ -321,13 +460,13 @@ body {
 .about-text {
     font-size: 1.1rem;
     line-height: 1.8;
-    color: #666;
+    color: var(--muted);
 }
 
 /* Contact Section */
 .contact-section {
     padding: 80px 0;
-    background: white;
+    background: var(--surface);
 }
 
 .contact-info {
@@ -342,18 +481,18 @@ body {
     align-items: center;
     gap: 0.5rem;
     font-size: 1.1rem;
-    color: #333;
+    color: var(--text);
 }
 
 .contact-item i {
-    color: #000;
+    color: var(--text-strong);
     font-size: 1.2rem;
 }
 
 /* Footer */
 .footer {
-    background: #000;
-    color: white;
+    background: var(--text-strong);
+    color: var(--accent-contrast);
     text-align: center;
     padding: 2rem 0;
 }
@@ -365,7 +504,7 @@ body {
     right: -400px;
     width: 400px;
     height: 100vh;
-    background: white;
+    background: var(--surface);
     box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
     z-index: 1001;
     transition: right 0.3s ease;
@@ -379,7 +518,7 @@ body {
 
 .cart-header {
     padding: 1.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -395,12 +534,12 @@ body {
     border: none;
     font-size: 1.2rem;
     cursor: pointer;
-    color: #666;
+    color: var(--muted);
     transition: color 0.3s ease;
 }
 
 .close-cart:hover {
-    color: #000;
+    color: var(--text-strong);
 }
 
 .cart-items {
@@ -413,7 +552,7 @@ body {
     display: flex;
     gap: 1rem;
     padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border);
 }
 
 .cart-item-image {
@@ -433,14 +572,14 @@ body {
 }
 
 .cart-item-size {
-    color: #666;
+    color: var(--muted);
     font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
 
 .cart-item-price {
     font-weight: 600;
-    color: #000;
+    color: var(--text-strong);
 }
 
 .cart-item-remove {
@@ -470,8 +609,8 @@ body {
 
 .checkout-btn {
     width: 100%;
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     border: none;
     padding: 1rem;
     border-radius: 8px;
@@ -482,7 +621,7 @@ body {
 }
 
 .checkout-btn:hover {
-    background: #333;
+    background: color-mix(in oklab, var(--accent) 85%, transparent);
 }
 
 /* Modal Styles */
@@ -504,7 +643,7 @@ body {
 }
 
 .modal-content {
-    background: white;
+    background: var(--surface);
     border-radius: 15px;
     max-width: 600px;
     width: 90%;
@@ -530,7 +669,7 @@ body {
 
 .modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -546,12 +685,12 @@ body {
     border: none;
     font-size: 1.2rem;
     cursor: pointer;
-    color: #666;
+    color: var(--muted);
     transition: color 0.3s ease;
 }
 
 .close-modal:hover {
-    color: #000;
+    color: var(--text-strong);
 }
 
 .modal-body {
@@ -581,7 +720,7 @@ body {
 .price {
     font-size: 2rem;
     font-weight: 700;
-    color: #000;
+    color: var(--text-strong);
 }
 
 .size-selection {
@@ -605,12 +744,12 @@ body {
 
 .size-selection select:focus {
     outline: none;
-    border-color: #000;
+    border-color: var(--text-strong);
 }
 
 .add-to-cart-btn {
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     border: none;
     padding: 1rem 2rem;
     border-radius: 50px;
@@ -623,7 +762,7 @@ body {
 }
 
 .add-to-cart-btn:hover {
-    background: #333;
+    background: color-mix(in oklab, var(--accent) 85%, transparent);
     transform: translateY(-2px);
 }
 
@@ -642,7 +781,7 @@ body {
 .form-group label {
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text);
 }
 
 .form-group input,
@@ -660,11 +799,11 @@ body {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #000;
+    border-color: var(--text-strong);
 }
 
 .order-summary {
-    background: #f8f9fa;
+    background: color-mix(in oklab, var(--surface) 96%, var(--bg));
     padding: 1.5rem;
     border-radius: 10px;
     margin: 1rem 0;
@@ -690,13 +829,13 @@ body {
 .order-total {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 2px solid #000;
+    border-top: 2px solid var(--text-strong);
     font-size: 1.2rem;
 }
 
 .submit-order-btn {
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     border: none;
     padding: 1rem 2rem;
     border-radius: 8px;
@@ -708,7 +847,7 @@ body {
 }
 
 .submit-order-btn:hover {
-    background: #333;
+    background: color-mix(in oklab, var(--accent) 85%, transparent);
 }
 
 /* Order Confirmation Popup */
@@ -776,18 +915,18 @@ body {
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 1rem;
-    color: #000;
+    color: var(--text-strong);
 }
 
 .confirmation-content p {
-    color: #666;
+    color: var(--muted);
     margin-bottom: 2rem;
     line-height: 1.6;
 }
 
 .confirmation-btn {
-    background: #000;
-    color: white;
+    background: var(--accent);
+    color: var(--accent-contrast);
     border: none;
     padding: 1rem 2rem;
     border-radius: 50px;
@@ -798,7 +937,7 @@ body {
 }
 
 .confirmation-btn:hover {
-    background: #333;
+    background: color-mix(in oklab, var(--accent) 85%, transparent);
     transform: translateY(-2px);
 }
 
