@@ -1,6 +1,17 @@
 // Product data
 const products = [
     {
+        id: 7,
+        name: "Red Moon Edition",
+        description: "Minimal red moon graphic on premium 240GSM oversized tee. Ultra-soft. Limited pieces.",
+        price: 1499,
+        originalPrice: 1999,
+        discountPercent: 25,
+        image: "images/red moon.jpg",
+        sizes: ["S", "M", "L", "XL", "XXL"],
+        stock: "Limited Pieces"
+    },
+    {
         id: 1,
         name: "Amiri Classic Collection",
         description: "Premium Amiri-inspired oversized t-shirt with luxury streetwear aesthetic. Limited stock available.",
@@ -155,24 +166,27 @@ function createProductCard(product) {
     card.onclick = () => openProductModal(product);
     
     card.innerHTML = `
-        <img
-            src="${product.image}?nf_resize=fit&w=800"
-            srcset="
-                ${product.image}?nf_resize=fit&w=400 400w,
-                ${product.image}?nf_resize=fit&w=800 800w,
-                ${product.image}?nf_resize=fit&w=1200 1200w"
-            sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            alt="${product.name}"
-            class="product-image"
-            loading="lazy"
-            decoding="async"
-            width="800"
-            height="800"
-        >
+        <div style="position: relative;">
+            ${product.discountPercent ? `<div class="discount-badge" style="position:absolute; top:10px; left:10px; background:#ff3b30; color:#fff; padding:4px 8px; font-weight:700; border-radius:6px; font-size:0.8rem; z-index:1;">${product.discountPercent}% OFF</div>` : ''}
+            <img
+                src="${product.image}?nf_resize=fit&w=800"
+                srcset="
+                    ${product.image}?nf_resize=fit&w=400 400w,
+                    ${product.image}?nf_resize=fit&w=800 800w,
+                    ${product.image}?nf_resize=fit&w=1200 1200w"
+                sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                alt="${product.name}"
+                class="product-image"
+                loading="lazy"
+                decoding="async"
+                width="800"
+                height="800"
+            >
+        </div>
         <div class="product-info">
             <h3 class="product-name">${product.name}</h3>
             <p class="product-description">${product.description}</p>
-            <div class="product-price">Rs. ${product.price.toLocaleString()}</div>
+            <div class="product-price">${product.originalPrice ? `<span style="text-decoration: line-through; color: #888; margin-right: 8px;">Rs. ${product.originalPrice.toLocaleString()}</span><span style="color: #28a745; font-weight: 700;">Rs. ${product.price.toLocaleString()}</span>` : `Rs. ${product.price.toLocaleString()}`}</div>
             <div class="product-stock">${product.stock}</div>
         </div>
     `;
@@ -197,7 +211,11 @@ function openProductModal(product) {
     modalImage.sizes = '(max-width: 900px) 90vw, 1200px';
     modalImage.alt = product.name;
     modalDescription.textContent = product.description;
-    modalPrice.textContent = `Rs. ${product.price.toLocaleString()}`;
+    if (product.originalPrice && product.price < product.originalPrice) {
+        modalPrice.innerHTML = `<span style="text-decoration: line-through; color: #888; margin-right: 8px;">Rs. ${product.originalPrice.toLocaleString()}</span><span style="color: #28a745; font-weight: 700;">Rs. ${product.price.toLocaleString()}</span>`;
+    } else {
+        modalPrice.textContent = `Rs. ${product.price.toLocaleString()}`;
+    }
     
     // Add stock information to description
     const stockInfo = document.createElement('div');
