@@ -2,12 +2,12 @@
 const products = [
     {
         id: 7,
-        name: "Red Moon Edition",
-        description: "Minimal red moon graphic on premium 240GSM oversized tee. Ultra-soft. Limited pieces.",
-        price: 1499,
+        name: "Retro Ferrari Edition",
+        description: "Iconic Retro Ferrari tee in premium 240GSM cotton. Vibrant print, ultra-soft feel, limited drop.",
+        price: 999,
         originalPrice: 1999,
-        discountPercent: 25,
-        image: "images/red moon.jpg",
+        discountPercent: 50,
+        image: "images/Ferrari Retro.jpg",
         sizes: ["S", "M", "L", "XL", "XXL"],
         stock: "Limited Pieces"
     },
