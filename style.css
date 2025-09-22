@@ -40,6 +40,18 @@ body {
     color: var(--text);
     background-color: var(--bg);
     overflow-x: hidden;
+
+    /* Rainbow gradient background for the whole page */
+    background: linear-gradient(135deg, #ff5f6d, #ffc371, #47cf73, #1fa2ff, #a259c4, #ff5f6d);
+    background-size: 400% 400%;
+    animation: rainbowBG 15s ease infinite;
+}
+
+/* Optional: Smooth animated gradient */
+@keyframes rainbowBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
 }
 
 .container {
