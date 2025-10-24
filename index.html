@@ -10,6 +10,150 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" href="images/logo.png" type="image/png">
+
+    <!-- Small inline styles to add a refined winter feature and remove rainbow on Retro Ferrari -->
+    <style>
+        /* Remove any rainbow/gradient override for Retro Ferrari edition if present */
+        .retro-ferrari,
+        .retro-ferrari * {
+            background-image: none !important;
+            background: transparent !important;
+            background-color: inherit !important;
+            filter: none !important;
+        }
+
+        /* Winter collection / featured product styling (keeps look professional) */
+        .winter-section {
+            padding: 56px 0;
+            background: linear-gradient(180deg, rgba(250,250,252,1) 0%, rgba(245,247,250,1) 100%);
+            color: #111;
+        }
+        .winter-feature {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 32px;
+            align-items: center;
+        }
+        .winter-feature .images {
+            display: flex;
+            gap: 12px;
+        }
+        .winter-feature .images img {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 8px;
+            box-shadow: 0 6px 22px rgba(15,23,42,0.08);
+            object-fit: cover;
+        }
+        .winter-feature .thumbs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .winter-feature .details h3 {
+            margin: 0 0 8px;
+            letter-spacing: 0.02em;
+            font-weight: 700;
+        }
+        .winter-feature .details .price {
+            color: #0b6b5a;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        .winter-feature .details p {
+            margin-bottom: 12px;
+            color: #444;
+        }
+        .winter-feature .details .size-select,
+        .winter-feature .details .cta {
+            margin-top: 10px;
+        }
+        .winter-feature .details select,
+        .winter-feature .details button {
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid #e6e9ee;
+            background: #fff;
+            font-weight: 600;
+        }
+        .winter-feature .details .cta {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            background: #111;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(17,24,39,0.08);
+        }
+
+        /* Product card tweak for a professional grid look */
+        .product-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: left;
+            box-shadow: 0 8px 28px rgba(15,23,42,0.04);
+            transition: transform .16s ease, box-shadow .16s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 38px rgba(15,23,42,0.08);
+        }
+
+        /* Center modal overlay and content */
+        .modal {
+            position: fixed;
+            inset: 0; /* top:0; right:0; bottom:0; left:0; */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            padding: 20px;
+        }
+        .modal.open {
+            display: flex !important;
+        }
+        .modal-content {
+            max-width: 1100px;
+            width: 94%;
+            max-height: 90vh;
+            overflow: auto;
+            border-radius: 12px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(2,6,23,0.45);
+        }
+
+        /* Ensure the modal slider and slides are centered */
+        #modal-slider {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        #modal-slider .modal-slide {
+            display: none;
+            text-align: center;
+            padding: 10px 0;
+        }
+        #modal-slider .modal-slide img {
+            margin: 0 auto;
+            display: inline-block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .winter-feature {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Splash Screen -->
@@ -36,7 +180,7 @@
                     <h2>OXEN STUDIOS</h2>
                 </div>
                 <nav class="nav">
-                    <a href="#products" class="nav-link">Products</a>
+                    <a href="#tshirts" class="nav-link">Our Collection</a>
                     <a href="#about" class="nav-link">About</a>
                     <a href="#contact" class="nav-link">Contact</a>
                 </nav>
@@ -62,12 +206,14 @@
             </div>
         </section>
 
-        <!-- Products Section -->
-        <section id="products" class="products-section">
+
+        <!-- T-Shirts Section (was "Our Collection") -->
+        <section id="tshirts" class="products-section">
             <div class="container">
-                <h2 class="section-title">Our Collection</h2>
+                <h2 class="section-title">T-Shirts Collection</h2>
                 <div class="products-grid" id="products-grid">
-                    <!-- Products will be dynamically loaded here -->
+                    <!-- product cards for t-shirts are injected here by script.js -->
+                    <!-- ...existing code... -->
                 </div>
             </div>
         </section>
@@ -144,7 +290,13 @@
             </div>
             <div class="modal-body">
                 <div class="product-image-container">
-                    <img id="modal-product-image" src="" alt="Product Image" loading="lazy" decoding="async" width="1200" height="1200">
+                    <!-- Slider container: slides and thumbnails injected by JS -->
+                    <div id="modal-slider" style="position:relative;display:block;max-width:720px;margin:0 auto;">
+                        <!-- slides inserted here -->
+                    </div>
+                    <div id="modal-thumbs" style="display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap;">
+                        <!-- thumbnails inserted here -->
+                    </div>
                 </div>
                 <div class="product-details">
                     <p id="modal-product-description" class="product-description"></p>
@@ -236,5 +388,6 @@
     <div id="cart-overlay" class="cart-overlay" onclick="toggleCart()"></div>
 
     <script src="script.js"></script>
+    <!-- No functional JS changes added here; visual/markup changes implemented above. -->
 </body>
 </html>

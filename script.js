@@ -1,5 +1,20 @@
 // Product data
 const products = [
+   {
+    "id": 8,
+    "name": "The OX Hoodie",
+    "description": "Premium heavy-weight oversized hoodie built for warmth and street-ready style. Double-stitched seams and brushed interior fleece.",
+    "price": 2200,
+    "image":
+   [
+        "images/hoodie1 back.png",
+        "images/hoodie1 front.png"
+    ],
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "stock": "Limited Drop",
+    "section": "winter"
+},
+   
     {
         id: 7,
         name: "Retro Ferrari Edition",
@@ -72,6 +87,10 @@ const products = [
 // Global variables
 let cart = [];
 let currentProduct = null;
+
+// modal state
+let modalCurrentProduct = null;
+let modalCurrentIndex = 0;
 
 // Google Sheets configuration
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTbRG35QgtrWwKiPOxBex_MlBXlM5kSbmcMKlMDG1OBKROrAmLzM4x2zv-UfrLKN_lcg/exec'; // Replace with your actual Google Apps Script URL
@@ -164,16 +183,20 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
     card.onclick = () => openProductModal(product);
-    
+
+    // Pick image (support array or string) and sanitize/encode it
+    const rawImage = Array.isArray(product.image) ? product.image[0] : product.image || 'images/placeholder.jpg';
+    const imgSrc = encodeURI(rawImage.trim());
+
     card.innerHTML = `
         <div style="position: relative;">
             ${product.discountPercent ? `<div class="discount-badge" style="position:absolute; top:10px; left:10px; background:#ff3b30; color:#fff; padding:4px 8px; font-weight:700; border-radius:6px; font-size:0.8rem; z-index:1;">${product.discountPercent}% OFF</div>` : ''}
             <img
-                src="${product.image}?nf_resize=fit&w=800"
+                src="${imgSrc}?nf_resize=fit&w=800"
                 srcset="
-                    ${product.image}?nf_resize=fit&w=400 400w,
-                    ${product.image}?nf_resize=fit&w=800 800w,
-                    ${product.image}?nf_resize=fit&w=1200 1200w"
+                    ${imgSrc}?nf_resize=fit&w=400 400w,
+                    ${imgSrc}?nf_resize=fit&w=800 800w,
+                    ${imgSrc}?nf_resize=fit&w=1200 1200w"
                 sizes="(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 alt="${product.name}"
                 class="product-image"
@@ -195,64 +218,219 @@ function createProductCard(product) {
 }
 
 function openProductModal(product) {
-    currentProduct = product;
+    modalCurrentProduct = product;
+    modalCurrentIndex = 0;
+
     const modal = document.getElementById('product-modal');
-    const modalName = document.getElementById('modal-product-name');
-    const modalImage = document.getElementById('modal-product-image');
-    const modalDescription = document.getElementById('modal-product-description');
-    const modalPrice = document.getElementById('modal-product-price');
-    
-    modalName.textContent = product.name;
-    modalImage.src = product.image + '?nf_resize=fit&w=1200';
-    modalImage.srcset = `
-        ${product.image}?nf_resize=fit&w=600 600w,
-        ${product.image}?nf_resize=fit&w=900 900w,
-        ${product.image}?nf_resize=fit&w=1200 1200w`;
-    modalImage.sizes = '(max-width: 900px) 90vw, 1200px';
-    modalImage.alt = product.name;
-    modalDescription.textContent = product.description;
-    if (product.originalPrice && product.price < product.originalPrice) {
-        modalPrice.innerHTML = `<span style="text-decoration: line-through; color: #888; margin-right: 8px;">Rs. ${product.originalPrice.toLocaleString()}</span><span style="color: #28a745; font-weight: 700;">Rs. ${product.price.toLocaleString()}</span>`;
-    } else {
-        modalPrice.textContent = `Rs. ${product.price.toLocaleString()}`;
+    const nameEl = document.getElementById('modal-product-name');
+    const descEl = document.getElementById('modal-product-description');
+    const priceEl = document.getElementById('modal-product-price');
+    const sizeSelect = document.getElementById('size-select');
+
+    // Product text
+    nameEl.textContent = product.name || '';
+    descEl.textContent = product.description || '';
+    priceEl.textContent = `Rs. ${Number(product.price || 0).toLocaleString()}`;
+
+    // Fill sizes (if provided)
+    if (product.sizes && Array.isArray(product.sizes)) {
+        sizeSelect.innerHTML = product.sizes.map(s => `<option value="${s}">${s}</option>`).join('');
     }
-    
-    // Add stock information to description
-    const stockInfo = document.createElement('div');
-    stockInfo.className = 'product-stock-modal';
-    stockInfo.textContent = product.stock;
-    stockInfo.style.cssText = 'color: #ff6b35; font-weight: 600; margin-top: 0.5rem; font-size: 0.9rem;';
-    
-    // Clear previous stock info and add new one
-    const existingStock = modalDescription.parentNode.querySelector('.product-stock-modal');
-    if (existingStock) {
-        existingStock.remove();
+
+    // Build images array (support string, array, and imageBack fields)
+    let imgs = [];
+    if (Array.isArray(product.image)) {
+        imgs = product.image.slice();
+    } else if (typeof product.image === 'string' && product.image.trim()) {
+        imgs.push(product.image.trim());
     }
-    modalDescription.parentNode.appendChild(stockInfo);
-    
-    modal.classList.add('show');
-    modal.style.display = 'flex';
+    if (product.imageBack && typeof product.imageBack === 'string') {
+        if (!imgs.includes(product.imageBack.trim())) imgs.push(product.imageBack.trim());
+    }
+
+    if (imgs.length === 0) imgs.push('images/placeholder.jpg');
+
+    buildModalSlider(imgs);
+
+    // show modal (use CSS .open -> flex centering)
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
     const modal = document.getElementById('product-modal');
-    modal.classList.remove('show');
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    // clear slider
+    const slider = document.getElementById('modal-slider');
+    if (slider) slider.innerHTML = '';
+    const thumbs = document.getElementById('modal-thumbs');
+    if (thumbs) thumbs.innerHTML = '';
+    modalCurrentProduct = null;
+    modalCurrentIndex = 0;
 }
 
+function buildModalSlider(images) {
+    const slider = document.getElementById('modal-slider');
+    const thumbs = document.getElementById('modal-thumbs');
+    slider.innerHTML = '';
+    thumbs.innerHTML = '';
+
+    images.forEach((src, i) => {
+        const imgSrc = encodeURI(src.trim());
+
+        // Slide
+        const slide = document.createElement('div');
+        slide.className = 'modal-slide';
+        slide.style.display = i === 0 ? 'block' : 'none';
+        slide.style.textAlign = 'center';
+        slide.style.padding = '10px 0';
+
+        const img = document.createElement('img');
+        img.src = `${imgSrc}`;
+        img.alt = `${modalCurrentProduct ? modalCurrentProduct.name : 'product'} - ${i+1}`;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.borderRadius = '8px';
+        img.loading = 'lazy';
+        slide.appendChild(img);
+
+        slider.appendChild(slide);
+
+        // Thumb
+        const thumbBtn = document.createElement('button');
+        thumbBtn.className = 'modal-thumb';
+        thumbBtn.style.border = 'none';
+        thumbBtn.style.padding = '0';
+        thumbBtn.style.background = 'transparent';
+        thumbBtn.style.cursor = 'pointer';
+        thumbBtn.style.opacity = i === 0 ? '1' : '0.6';
+
+        const thumbImg = document.createElement('img');
+        thumbImg.src = `${imgSrc}`;
+        thumbImg.alt = `thumb-${i+1}`;
+        thumbImg.style.width = '72px';
+        thumbImg.style.height = '72px';
+        thumbImg.style.objectFit = 'cover';
+        thumbImg.style.borderRadius = '6px';
+        thumbImg.style.boxShadow = i === 0 ? '0 6px 18px rgba(0,0,0,0.12)' : 'none';
+
+        thumbBtn.appendChild(thumbImg);
+        thumbBtn.addEventListener('click', () => showSlide(i));
+
+        thumbs.appendChild(thumbBtn);
+    });
+
+    // Prev / Next arrows
+    // Remove existing arrows if any
+    const existingPrev = document.getElementById('modal-prev');
+    const existingNext = document.getElementById('modal-next');
+    if (existingPrev) existingPrev.remove();
+    if (existingNext) existingNext.remove();
+
+    const prev = document.createElement('button');
+    prev.id = 'modal-prev';
+    prev.innerHTML = '&#10094;';
+    prev.style.position = 'absolute';
+    prev.style.left = '6px';
+    prev.style.top = '50%';
+    prev.style.transform = 'translateY(-50%)';
+    prev.style.background = 'rgba(0,0,0,0.5)';
+    prev.style.color = '#fff';
+    prev.style.border = 'none';
+    prev.style.padding = '8px 10px';
+    prev.style.borderRadius = '6px';
+    prev.style.cursor = 'pointer';
+    prev.addEventListener('click', () => showSlide(modalCurrentIndex - 1));
+    slider.appendChild(prev);
+
+    const next = document.createElement('button');
+    next.id = 'modal-next';
+    next.innerHTML = '&#10095;';
+    next.style.position = 'absolute';
+    next.style.right = '6px';
+    next.style.top = '50%';
+    next.style.transform = 'translateY(-50%)';
+    next.style.background = 'rgba(0,0,0,0.5)';
+    next.style.color = '#fff';
+    next.style.border = 'none';
+    next.style.padding = '8px 10px';
+    next.style.borderRadius = '6px';
+    next.style.cursor = 'pointer';
+    next.addEventListener('click', () => showSlide(modalCurrentIndex + 1));
+    slider.appendChild(next);
+
+    // ensure global index set
+    modalCurrentIndex = 0;
+    showSlide(0);
+}
+
+function showSlide(index) {
+    const slides = document.querySelectorAll('#modal-slider .modal-slide');
+    const thumbs = document.querySelectorAll('#modal-thumbs .modal-thumb');
+
+    if (!slides || slides.length === 0) return;
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    modalCurrentIndex = index;
+
+    slides.forEach((s, i) => {
+        s.style.display = i === index ? 'block' : 'none';
+    });
+    thumbs.forEach((t, i) => {
+        t.style.opacity = i === index ? '1' : '0.6';
+        const img = t.querySelector('img');
+        if (img) img.style.boxShadow = i === index ? '0 6px 18px rgba(0,0,0,0.12)' : 'none';
+    });
+}
+
+// existing addToCartFromModal may exist; safe implementation:
 function addToCartFromModal() {
-    if (!currentProduct) return;
-    
+    if (!modalCurrentProduct) return;
     const sizeSelect = document.getElementById('size-select');
-    const selectedSize = sizeSelect.value;
-    
-    addToCart(currentProduct, selectedSize);
-    closeModal();
-    
-    // Show success feedback
-    showCartFeedback();
+    const size = sizeSelect ? sizeSelect.value : '';
+    const item = {
+        id: modalCurrentProduct.id,
+        name: modalCurrentProduct.name,
+        price: Number(modalCurrentProduct.price || 0),
+        size,
+        image: (modalCurrentProduct.image && (Array.isArray(modalCurrentProduct.image) ? modalCurrentProduct.image[0] : modalCurrentProduct.image)) || modalCurrentProduct.imageBack || ''
+    };
+
+    // If your code already exposes addToCart function, use it; otherwise gracefully fallback to existing cart handler
+    if (typeof addToCart === 'function') {
+        addToCart(item);
+    } else if (typeof addToCartHandler === 'function') {
+        addToCartHandler(item);
+    } else {
+        // minimal fallback: push to localStorage cart array and update cart-count if present
+        try {
+            const cartKey = 'oxen_cart_v1';
+            const raw = localStorage.getItem(cartKey);
+            const cart = raw ? JSON.parse(raw) : [];
+            cart.push(item);
+            localStorage.setItem(cartKey, JSON.stringify(cart));
+            const countEl = document.getElementById('cart-count');
+            if (countEl) countEl.textContent = cart.length;
+            closeModal();
+            alert('Added to cart');
+        } catch (e) {
+            console.error('addToCartFromModal fallback failed', e);
+        }
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('product-modal');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+    // clear slider
+    const slider = document.getElementById('modal-slider');
+    if (slider) slider.innerHTML = '';
+    const thumbs = document.getElementById('modal-thumbs');
+    if (thumbs) thumbs.innerHTML = '';
+    modalCurrentProduct = null;
+    modalCurrentIndex = 0;
 }
 
 function addToCart(product, size) {
