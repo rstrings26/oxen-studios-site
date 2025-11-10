@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Cart - Oxen Studios</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { margin: 0 0 1rem 0; }
+        a {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        a:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Cart Cleared!</h1>
+        <p>The corrupted cart data has been removed.</p>
+        <a href="index.html">← Back to Store</a>
+    </div>
+    <script>
+        // Clear the cart from localStorage
+        localStorage.removeItem('oxen_cart');
+        console.log('Cart cleared from localStorage');
+        
+        // Also clear any other corrupted data
+        try {
+            localStorage.removeItem('cart');
+        } catch(e) {}
+    </script>
+</body>
+</html>
